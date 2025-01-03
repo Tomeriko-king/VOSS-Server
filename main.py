@@ -1,2 +1,4 @@
+from tcp_connection import start_server
+
 if __name__ == '__main__':
-    print('VOSS-Server')
+    start_server()
