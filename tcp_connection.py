@@ -1,8 +1,19 @@
 import socket
+from enum import Enum
 from threading import Thread
+
+from hand_authenticator import verify_password
+from hand_side import HandSide
+from password_status import PasswordStatus
 
 HOST = '127.0.0.1'  # Localhost
 PORT = 12345  # Arbitrary port for the server
+
+
+class AuthenticationStatus(Enum):
+    RECEIVED_OK = b'OK'
+    RECEIVED_FAILED = b'FAILED'
+    RECEIVED_PASSED = b'PASSED'
 
 
 def start_server():
@@ -24,8 +35,36 @@ def start_server():
         handle_client_thread.start()
 
 
+def handle_authentication(client_socket: socket.socket):
+    password_list = []
+
+    number_of_tries = 0
+
+    while True:
+        hand = HandSide(client_socket.recv(64).decode())
+        print(hand)
+        password_list.append(hand)
+
+        status = verify_password(password_list)
+        print(status)
+        if status == PasswordStatus.MATCH:
+            client_socket.send(AuthenticationStatus.RECEIVED_PASSED.value)
+            return True
+        elif status == PasswordStatus.NOT_MATCH:
+            number_of_tries += 1
+            if number_of_tries == 3:
+                # Handle failure
+                client_socket.send(AuthenticationStatus.RECEIVED_FAILED.value)
+                return False
+
+            client_socket.send(AuthenticationStatus.RECEIVED_OK.value)
+            password_list.clear()
+        elif status == PasswordStatus.IN_PROCESS:
+            client_socket.send(AuthenticationStatus.RECEIVED_OK.value)
+
+
 def handle_connection(client_socket: socket.socket):
-    # TODO
+    succeeded = handle_authentication(client_socket)
 
     # Close the client socket connection
     client_socket.close()
