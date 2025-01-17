@@ -16,6 +16,9 @@ class AuthenticationStatus(Enum):
     RECEIVED_PASSED = b'PASSED'
 
 
+connected = []
+
+
 def start_server():
     # Create a socket object
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,6 +33,7 @@ def start_server():
     while True:
         # Accept a connection from the client
         client_socket, client_address = server_socket.accept()
+        connected.append(client_address)
         print(f"Connected to {client_address}")
         handle_client_thread = Thread(target=handle_connection, args=[client_socket])
         handle_client_thread.start()
@@ -63,8 +67,9 @@ def handle_authentication(client_socket: socket.socket):
             client_socket.send(AuthenticationStatus.RECEIVED_OK.value)
 
 
-def handle_connection(client_socket: socket.socket):
+def handle_connection(client_socket: socket.socket, client_address: tuple):
     succeeded = handle_authentication(client_socket)
 
     # Close the client socket connection
     client_socket.close()
+    connected.remove(client_address)
