@@ -76,11 +76,19 @@ def handle_connection(client_socket: socket.socket, client_address: tuple):
 
 
 
-def send_request(client_socket: socket.socket, target_ip):
+def send_request(client_socket: socket.socket):  #server_socket
         message = "send_a_screenshot"
         client_socket.send(message.encode())
         validation = client_socket.recv(1024).decode()
         return validation
+
+
+def hold_admin(client_socket: socket.socket):  #admin_socket
+    ask_for_target_ip = client_socket.recv(1024).decode()
+    client_socket.send(send_request(connected[ask_for_target_ip]).encode())
+
+
+
 
 
 
