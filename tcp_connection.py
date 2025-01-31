@@ -16,7 +16,7 @@ class AuthenticationStatus(Enum):
     RECEIVED_PASSED = b'PASSED'
 
 
-connected = []
+connected = {}
 
 
 def start_server():
@@ -33,7 +33,7 @@ def start_server():
     while True:
         # Accept a connection from the client
         client_socket, client_address = server_socket.accept()
-        connected.append(client_address)
+        connected[client_address] = client_socket
         print(f"Connected to {client_address}")
         handle_client_thread = Thread(target=handle_connection, args=[client_socket])
         handle_client_thread.start()
@@ -72,4 +72,17 @@ def handle_connection(client_socket: socket.socket, client_address: tuple):
 
     # Close the client socket connection
     client_socket.close()
-    connected.remove(client_address)
+    del connected[client_address]
+
+
+
+def send_request(client_socket: socket.socket, target_ip):
+        message = "send_a_screenshot"
+        client_socket.send(message.encode())
+        validation = client_socket.recv(1024).decode()
+        return validation
+
+
+
+
+
