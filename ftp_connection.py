@@ -25,42 +25,5 @@ def run_ftp_server():
 
 
 
-def upload_file():
-    # Connect to the FTP server
-    ftp = FTP()
-    ftp.connect('127.0.0.1', 21)  # Replace with your server's IP and port if needed
-    ftp.login('user', 'password')  # Login with the username and password you set
-
-    # Path to the file you want to upload
-    local_file = 'path/to/local/file.txt'  # Change this to the path of your file
-    remote_file = 'file.txt'  # Remote file name on the server
-
-    # Open the local file and upload it
-    with open(local_file, 'rb') as f:
-        ftp.storbinary(f"STOR {remote_file}", f)
-
-    print(f"File '{local_file}' uploaded successfully.")
-
-    # Close the FTP connection
-    ftp.quit()
 
 
-
-def download_file():
-    # Connect to the FTP server
-    ftp = FTP()
-    ftp.connect('127.0.0.1', 21)  # Replace with your server's IP and port if needed
-    ftp.login('user', 'password')  # Login with the username and password you set
-
-    # Path to the remote file you want to download
-    remote_file = 'file.txt'  # Name of the file on the server
-    local_file = 'path/to/local/save/location/file.txt'  # Path to save the downloaded file locally
-
-    # Open a local file to save the downloaded file
-    with open(local_file, 'wb') as f:
-        ftp.retrbinary(f"RETR {remote_file}", f.write)
-
-    print(f"File '{remote_file}' downloaded successfully.")
-
-    # Close the FTP connection
-    ftp.quit()
