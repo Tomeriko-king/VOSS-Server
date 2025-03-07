@@ -16,7 +16,7 @@ class AuthenticationStatus(Enum):
     RECEIVED_PASSED = b'PASSED'
 
 
-connected = {}
+connected_clients: dict[tuple[str, int], socket.socket] = {}
 
 
 def start_server():
@@ -33,9 +33,9 @@ def start_server():
     while True:
         # Accept a connection from the client
         client_socket, client_address = server_socket.accept()
-        connected[client_address] = client_socket  # TODO
+        connected_clients[client_address] = client_socket
         print(f"Connected to {client_address}")
-        handle_client_thread = Thread(target=handle_connection, args=[client_socket])
+        handle_client_thread = Thread(target=handle_connection, args=[client_address])
         handle_client_thread.start()
 
 
@@ -68,16 +68,21 @@ def handle_authentication(client_socket: socket.socket):
             client_socket.send(AuthenticationStatus.RECEIVED_OK.value)
 
 
-def handle_connection(client_socket: socket.socket):
-    succeeded = handle_authentication(client_socket)
+def close_client(client_address: tuple[str, int]):
+    connected_clients[client_address].close()
+    connected_clients.pop(client_address)
 
-    # Close the client socket connection
-    client_socket.close()
-    # del connected[client_address]
+
+def handle_connection(client_address: tuple[str, int]):
+    client_socket = connected_clients[client_address]
+
+    succeeded = handle_authentication(client_socket)
+    if not succeeded:
+        close_client(client_address)
 
 
 def send_request_to_target(client_socket: socket.socket):  # target_socket
-    message = "s_a_s"
+    message = "yes?"
     client_socket.send(message.encode())
     validation = client_socket.recv(1024).decode()
     return validation
@@ -85,7 +90,6 @@ def send_request_to_target(client_socket: socket.socket):  # target_socket
 
 def answer_to_admin(client_socket: socket.socket):  # admin_socket
     ask_for_target_ip = client_socket.recv(1024).decode()
-    client_socket.send(send_request_to_target(connected[ask_for_target_ip]).encode())
-    answer = client_socket.recv(1024).decode() #answer - success
+    client_socket.send(send_request_to_target(connected_clients[ask_for_target_ip]).encode())
+    answer = client_socket.recv(1024).decode()  # answer - success
     print(answer)
-
