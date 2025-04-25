@@ -1,7 +1,9 @@
-from hand_side import HandSide
-from password_status import PasswordStatus
+from typing import Final
 
-SECRET_PASSWORD = [HandSide.RIGHT, HandSide.RIGHT, HandSide.LEFT]
+from password_status import PasswordStatus
+from voss_socket import HandSide
+
+SECRET_PASSWORD: Final[list[HandSide]] = [HandSide.RIGHT, HandSide.RIGHT, HandSide.LEFT]
 
 
 def verify_password(hands_motions: list[HandSide]) -> PasswordStatus:
