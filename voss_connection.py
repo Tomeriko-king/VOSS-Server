@@ -24,7 +24,7 @@ def start_server():
         connected_clients[client_ip] = client_socket
         print(f"Connected to {client_ip}")
         if client_role == ClientRole.ADMIN:
-            handle_client_thread = Thread(target=handle_admin_connection, args=[server_socket, client_ip])
+            handle_client_thread = Thread(target=handle_admin_connection, args=(client_ip,))
             handle_client_thread.start()
 
 
@@ -62,7 +62,7 @@ def close_client(client_address: str):
     connected_clients.pop(client_address)
 
 
-def handle_admin_connection(server_socket: VOSSSocketServer, client_address: str):
+def handle_admin_connection(client_address: str):
     admin_conn: VOSSSocketConnectionAdmin = connected_clients[client_address]
 
     succeeded = handle_authentication(admin_conn)
@@ -72,12 +72,12 @@ def handle_admin_connection(server_socket: VOSSSocketServer, client_address: str
     while True:
         target_ip = admin_conn.recv_screenshot_from_target_request()
 
-        screenshot_filename = get_screenshot_from_target(server_socket, target_ip)
+        screenshot_filename = get_screenshot_from_target(target_ip)
 
         admin_conn.send_screenshot_from_target_response(screenshot_filename)
 
 
-def get_screenshot_from_target(server_socket: VOSSSocketServer, target_ip: str) -> str:
+def get_screenshot_from_target(target_ip: str) -> str:
     target_conn: VOSSSocketConnectionTarget = connected_clients[target_ip]
 
     target_conn.send_take_screenshot_request()
