@@ -6,7 +6,7 @@ from password_status import PasswordStatus
 from voss_socket import VOSSSocketServer, VOSSSocketConnection, VOSSSocketConnectionAdmin, AuthenticationStatus, \
     ClientRole, VOSSSocketConnectionTarget
 
-HOST: Final[str] = '0.0.0.0'  # Localhost
+HOST: Final[str] = '0.0.0.0'  # Listen on all available IP addresses
 
 connected_clients: dict[str, VOSSSocketConnection] = {}
 
